@@ -7,6 +7,6 @@ server.use(static(__dirname + '/public'));
 server.listen(9292);
 
 const livereload = require('livereload');
-const server = livereload.createServer();
-server.watch(__dirname + "/public");
+const lrserver = livereload.createServer();
+lrserver.watch(__dirname + "/public");
 

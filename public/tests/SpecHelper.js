@@ -1,11 +1,13 @@
-var fixture;
+let fixture;
 
 function loadFixture(path) {  
-  var html;
+  let html;
   jQuery.ajax({
-    url: '/index.html',
+    // url: '/index.html',
+    url: path,
     success: function(result) {
       html = result;
+      // console.log('success', html);
     },
     async: false
   });          
@@ -14,8 +16,8 @@ function loadFixture(path) {
 
 function resetFixture() {
   if (!fixture) {
-    var index = $('<div>').append(loadFixture('/index.html'));
-    var markup = index.find('div.markup');
+    const index = $('<div>').append(loadFixture('/index.html'));
+    const markup = index.find('div.markup');
     fixture = $('<div class="fixture" style="display: none">').append(markup);
     $('body').append(fixture.clone());
   } else {
