@@ -21,14 +21,14 @@ learnjs.applyObject=function(obj,elem){
 
 learnjs.landingView = function() {
   return learnjs.template('landing-view');
-}
+};
 
 learnjs.problemView = function(data){
   const problemNumber = parseInt(data,10);
   const view = $('.templates .problem-view').clone();
   const problemData = learnjs.problems[problemNumber-1];
   const resultFlash = view.find('.result');
-  
+
   function checkAnswer(){
     const answer = view.find('.answer').val();
     const test = problemData.code.replace('__',answer) + '; problem();';
@@ -46,6 +46,16 @@ learnjs.problemView = function(data){
     }
     return false;
   };
+
+  if (problemNumber < learnjs.problems.length){
+    const buttonItem = learnjs.template('skip-btn');
+    buttonItem.find('a').attr('href','#problem-' + (problemNumber + 1));
+    $('.nav-list').append(buttonItem);
+    view.bind('removingView',function(){
+      buttonItem.remove();
+    });
+  }
+
   view.find('.check-btn').click(checkAnswerClick);
   view.find('.title').text('Problem #' + problemNumber);
   learnjs.applyObject(problemData, view);
@@ -74,17 +84,25 @@ learnjs.flashElement = function(elem, content) {
 learnjs.showView = function(hash){
   const routes = {
     '#problem': learnjs.problemView,
+    '#': learnjs.landingView,
     '': learnjs.landingView
   };
   const hashParts = hash.split('-');
   const viewFn = routes[hashParts[0]];
   if (viewFn){
+    learnjs.triggerEvent('removingView', []);
     $('.view-container').empty().append(viewFn(hashParts[1]));
   };
+  // learnjs.triggerEvent('removingView', []);
+  // $('.view-container').empty().append(viewFn(hashParts[1]));
 };
 
 learnjs.template = function(name){
   return $('.templates .' + name).clone();
+};
+
+learnjs.triggerEvent = function(name, args){
+  $('.view-container>*').trigger(name, args);
 };
 
 learnjs.appOnReady = function(){
