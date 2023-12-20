@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- <meta name="referrer" content="no-referrer-when-downgrade" /> -->
     <meta charset='utf-8'>
     <title>Learn JS!</title>
+    <!-- <meta name="google-signin-client_id" content="863966693515-5272otk66s0vbsnip2jguo1taein7avd.apps.googleusercontent.com"> -->
     <link href='//fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css'>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css'>
     <script src='https://code.jquery.com/jquery-2.1.4.min.js'></script>
+    <!-- AWS SDK for JavaScript(ver.2.2.4) の独自サブセット（Cognito Identity,CognitoSync,DynamoDB,Lambda,STS）-->
     <script src='/vendor.js'></script>
     <script src='/app.js'></script>
+    <!-- ↓いる！ 2023.12.18 -->
+    <script src="https://accounts.google.com/gsi/client" async></script>
+
     <style type="text/css" media="all">
-      body { margin-top: 30px; }
+      body { margin-top: 90px; }
       .templates { display: none;}
       .inline-list { margin-bottom: 0px;} /* Skeleton reset  */
       .inline-list li {
@@ -35,6 +41,10 @@
         background: #666;
       }
       .nav-container a { color: white;}
+      .navbar-padding{
+        padding-top: 7px;
+        display: inline-block;
+      }
     </style>
   </head>
   <body>
@@ -44,10 +54,20 @@
           <li><a class="text-lg" href="#">LearnJS</a></li>
           <li><a href="#problem-1">Start</a></li>
         </ul>
+        <div class="four columns signin-bar">
+          
+          <span class="navbar-padding u-pull-right">
+            <div id="buttonDiv"></div>
+          </span>
+        </div>
       </div>
       <div class='view-container container'>
       </div>
       <div class="templates">
+        <div class="profile-link navbar-padding-lg">
+          <a href="#profile"></a>
+        </div>
+        <!-- アプリケーションシェル作成のため"view-container"から"templates"に移動した -->
         <div class="landing-view">
           <div class="row">
             <div class="one-half column">
@@ -77,9 +97,16 @@
         <li class="skip-btn">
           <a>Skip This Problem</a>
         </li>
+        <div class="profile-view">
+          <h3>Your profile</h3>
+          <div class="email"></div>
+        </div>
       </div>
     </div>
+    <!-- JS実行時に、その要素がまだページに存在していないためビューを作成できない可能性がある。 -->
+    <!-- それを回避するため、body要素の最後にページが準備できたことを知らせるscriptを追加 -->
     <script type="text/javascript">
+      // ページが準備できたことを受け取るリスナー
       $(window).ready(learnjs.appOnReady);
     </script>
   </body>
