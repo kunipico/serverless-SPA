@@ -3,7 +3,7 @@
 // 名前空間
 // アプリケーションの関数と変数をこのオブジェクトに追加する
 // const learnjs = {
-let learnjs = {
+const learnjs = {
   poolId: 'ap-northeast-1:ba272943-bf88-414d-b5c4-420028ddbb14'
 };
 
@@ -30,8 +30,8 @@ learnjs.showView = function(hash){
     '#': learnjs.landingView,
     '': learnjs.landingView
   };
-  const hashParts = hash.split('-');
-  const viewFn = routes[hashParts[0]];
+  let hashParts = hash.split('-');
+  let viewFn = routes[hashParts[0]];
   if (viewFn){
     learnjs.triggerEvent('removingView', []);
     $('.view-container').empty().append(viewFn(hashParts[1]));
@@ -44,32 +44,40 @@ learnjs.showView = function(hash){
 
 // ビュー関数
 learnjs.problemView = function(data){
-  const problemNumber = parseInt(data,10);
-  const view = $('.templates .problem-view').clone();
-  const problemData = learnjs.problems[problemNumber-1];
-  const resultFlash = view.find('.result');
-
-  function checkAnswer(){
-    const answer = view.find('.answer').val();
-    const test = problemData.code.replace('__',answer) + '; problem();';
-    return eval(test);
-  };
+  let problemNumber = parseInt(data,10);
+  let view = $('.templates .problem-view').clone();
+  let problemData = learnjs.problems[problemNumber-1];
+  let resultFlash = view.find('.result');
+  let answer = view.find('.answer');
 
   function checkAnswerClick(){
     if (checkAnswer()){
-      // const correctFlash = learnjs.template('correct-flash');
-      const correctFlash = learnjs.buildCorrectFlash(problemNumber);
-      // correctFlash.find('a').attr('href','#problem-' + (problemNumber + 1));
+      let correctFlash = learnjs.buildCorrectFlash(problemNumber);
       learnjs.flashElement(resultFlash, correctFlash);
+      console.log('answer : ',answer);
+      learnjs.saveAnswer(problemNumber,answer); 
     }else{
       learnjs.flashElement(resultFlash, 'Incorrect!');
     }
     // テストがリロードの無限ループを防ぐための一文
     return false;
   };
+  
+  function checkAnswer(){
+    answer = view.find('.answer').val();
+    let test = problemData.code.replace('__',answer) + '; problem();';
+    return eval(test);
+  };
+
+  learnjs.fetchAnswer(problemNumber).then(function(data){
+    if(data.Item){
+      console.log('data.Item : ',data.Item);
+      answer.val(data.Item.answer);
+    }
+  });
 
   if (problemNumber < learnjs.problems.length){
-    const buttonItem = learnjs.template('skip-btn');
+    let buttonItem = learnjs.template('skip-btn');
     buttonItem.find('a').attr('href','#problem-' + (problemNumber + 1));
     $('.nav-list').append(buttonItem);
     view.bind('removingView',function(){
@@ -113,8 +121,8 @@ learnjs.landingView = function() {
 
 
 learnjs.buildCorrectFlash = function (problemNum) {
-  const correctFlash = learnjs.template('correct-flash');
-  const link = correctFlash.find('a');
+  let correctFlash = learnjs.template('correct-flash');
+  let link = correctFlash.find('a');
   if(problemNum < learnjs.problems.length) {
     link.attr('href', '#problem-' + (problemNum + 1));
   }else{
@@ -149,13 +157,14 @@ learnjs.triggerEvent = function(name, args){
 
 // 自作関数　２０２３.12.19
 const decodeJwt = (token) => {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  let base64Url = token.split('.')[1];
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
   return JSON.parse(decodeURIComponent(myescape(window.atob(base64))));
 };
+
 const myescape = (str) => {
   return str.replace(/[^a-zA-Z0-9@*_+\-./]/g, m => {
-      const code = m.charCodeAt(0);
+      let code = m.charCodeAt(0);
       if (code <= 0xff) {
           return '%' + ('00' + code.toString(16)).slice(-2).toUpperCase();
       } else {
@@ -169,7 +178,7 @@ const myescape = (str) => {
 function handleCredentialResponse(googleUser) {
   // console.log("Encoded JWT ID token: " + googleUser.credential);
   // const id_token = googleUser.getAuthResponse().id_token;
-  const id_token = googleUser.credential;
+  let id_token = googleUser.credential;
   AWS.config.update({
     region: 'ap-northeast-1',
     credentials: new AWS.CognitoIdentityCredentials({
@@ -185,16 +194,16 @@ function handleCredentialResponse(googleUser) {
     return gapi.auth.getAuthInstance().signIn({
       prompt: 'login'
     }).then(function(userUpdate) {
-      const creds = AWS.config.credentials;
+      let creds = AWS.config.credentials;
       // const newToken = userUpdate.getAuthResponse().id_token;
-      const newToken = userUpdate.credential;
+      let newToken = userUpdate.credential;
       creds.params.Logins['accounts.google.com'] = newToken;
       return learnjs.awsRefresh();
     });
   }
 
   learnjs.awsRefresh().then(function(id) {
-    const responsePayload = decodeJwt(googleUser.credential);
+    let responsePayload = decodeJwt(googleUser.credential);
     console.log('id = ',id);
     console.log('responsePayload = ',responsePayload);
     console.log('email = ',responsePayload.email);
@@ -224,7 +233,7 @@ window.onload = function () {
 
 
 learnjs.awsRefresh = function() {
-  const deferred = new $.Deferred();
+  let deferred = new $.Deferred();
   AWS.config.credentials.refresh(function(err) {
     if (err) {
       deferred.reject(err);
@@ -242,7 +251,7 @@ learnjs.identity = new $.Deferred();
 
 
 learnjs.profileView = function() {
-  const view = learnjs.template('profile-view');
+  let view = learnjs.template('profile-view');
   learnjs.identity.done(function(identity) {
     view.find('.email').text(identity.email);
     console.log('identity.email = ',identity.email);
@@ -259,3 +268,72 @@ learnjs.addProfileLink = function(profile) {
   link.find('a').text(profile.email);
   $('.signin-bar').prepend(link);
 }
+
+
+
+learnjs.sendDbRequest = function(req, retry) {
+  let promise = new $.Deferred();
+  req.on('error', function(error){
+    if (error.code === "CredentialsError"){
+      learnjs.identity.then(function(identity){
+        return identity.refresh().then(function(){
+          return retry();
+        },function(){
+          promise.reject(resp);
+        });
+      });
+    } else {
+      promise.reject(error);
+    }
+  });
+  req.on('success',function(resp){
+    promise.resolve(resp.data);
+  });
+  req.send();
+  return promise;
+}
+
+
+
+learnjs.saveAnswer = function(problemId, answer){
+  return learnjs.identity.then(function(identity){
+    let db = new AWS.DynamoDB.DocumentClient();
+    let item = {
+      TableName: 'learnjs',
+      Item:{
+        userId: identity.id,
+        problemId: problemId,
+        answer: answer
+      }
+    };
+    return learnjs.sendDbRequest(db.put(item),function(){
+      return learnjs.saveAnswer(problemId,answer);
+    })
+  });
+}
+
+
+
+learnjs.fetchAnswer = function(problemId){
+  return learnjs.identity.then(function(identity){
+    let db = new AWS.DynamoDB.DocumentClient();
+    let item = {
+      TableName: 'learnjs',
+      Key: {
+        userId: identity.id,
+        problemId: problemId
+      }
+    };
+    return learnjs.sendDbRequest(db.get(item), function(){
+      return learnjs.fetchAnswer(problemId);
+    })
+  });
+}
+
+
+
+
+
+
+
+
